@@ -1,0 +1,41 @@
+### LIBRARIES AND DATA RETRIEVAL ###
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
+import pandas as pd
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+data = pd.read_csv('Churn_Modelling.csv')
+data = pd.get_dummies(data, columns=['Gender', 'Geography'])
+
+data= data.drop(columns= ['RowNumber', 'Surname', 'CustomerId'], axis= 1)
+data= data.astype(int)
+
+
+### DATA PREP ###
+
+features= ['CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts', 'HasCrCard', 'IsActiveMember', 'EstimatedSalary', 
+            'Geography_Germany', 'Geography_Spain', 'Geography_France', 'Gender_Male', 'Gender_Female']
+target= 'Exited'
+
+X= data[features]
+y= data[target]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+### MODEL PREP ###
+
+model= Sequential([
+    Dense(13, input_shape= (X_train.shape[1],), activation= 'relu'),
+    Dense(16, activation= 'relu'),
+    Dense(1, activation= 'sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+history= model.fit(X_train, y_train, epochs= 100, batch_size= 1000, validation_data= (X_test, y_test))
+
+loss, accuracy= model.evaluate(X_test, y_test)
+print(f"Test Accuracy: {accuracy* 100:.2f}%")
